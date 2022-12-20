@@ -8,4 +8,17 @@ This repository contains the source code and documentation for the gradPose tool
 
 We hope that this tool will be useful to researchers and practitioners in the field of bioinformatics. If you have any questions or suggestions, please don't hesitate to open an issue or submit a pull request. We welcome contributions and feedback from the community.
 
-## Instalation
+## Install
+
+From pip:
+    
+```bash
+pip install gradPose
+```
+
+From repository:
+    
+```bash
+pip install git+https://github.com/X-lab-3D/fast-superimposition
+```
+

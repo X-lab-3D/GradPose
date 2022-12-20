@@ -33,7 +33,7 @@ or
 ```
 gradPose example_pdb_folder
 ```
-The aligned proteins are automatically stored in the folder 'output'. Other folder name is possible using the -o option. This also works when you want to overwrite the current folder without creating a second folder.
+The aligned proteins are automatically stored in the folder 'output'. Using another folder name, or overwriting the current folder without creating a second is possible using the -o option. 
 
 If the pdbs need to be aligned to a specific template:
 ```

@@ -2,6 +2,10 @@
 Utility function(s) moved here to declutter the main file.
 """
 import sys
+import os
+import torch.multiprocessing as mp
+import torch.cuda
+import torch._C
 from argparse import ArgumentParser
 
 def parse_args():
@@ -21,7 +25,8 @@ def parse_args():
         help="""
         Folder containing the PDB models. -i or --input can be left out if calling superpose with only an input folder.
         """,
-        required=True
+        required=True,
+        type=str
     )
     arg_parser.add_argument("-s", "--subfolders",
         help="""
@@ -77,12 +82,21 @@ def parse_args():
         Defaults to 1.
         """,
         type=int,
-        default=4
+        default=mp.cpu_count()
     )
+
+    arg_parser.add_argument("-g", "--gpu",
+        help="""
+        (Optional) Enable CUDA accelleration for alignment.
+        Requires a PyTorch installation that supports CUDA.
+        """,
+        action='store_true'
+    )
+
     arg_parser.add_argument("-b", "--batch-size",
         help="""
         (Optional) Number of PDB files to align per batch.
-        Defaults to 50,000.
+        Defaults to 50,000 (maximum).
         """,
         type=int,
         default=50000
@@ -100,7 +114,10 @@ def parse_args():
         action='store_true'
     )
 
-    arg_parser.add_argument("--rmsd-test",
+    arg_parser.add_argument("--rmsd",
+        help="""
+        (Optional) Calculate RMSD between template and models (only at selected residues) and save the results as rmsd.tsv in the output folder.
+        """,
         action="store_true"
     )
 
@@ -121,6 +138,20 @@ def parse_args():
         parsed_args.verbosity = 2
     elif parsed_args.silent:
         parsed_args.verbosity = 0
+
+    if parsed_args.n_cores > mp.cpu_count():
+        parsed_args.n_cores = mp.cpu_count()
+        print(f"Argument Warning: CPU cores limited to {parsed_args.n_cores}.")
+
+    if parsed_args.batch_size > 50000:
+        parsed_args.batch_size = 50000
+        print(f"Argument Warning: Batch size limited to {parsed_args.batch_size}")
+
+    if parsed_args.gpu and not hasattr(torch._C, '_cuda_getDeviceCount'):
+        print("Argument Warning: Attempted to enable CUDA but PyTorch is not compiled with CUDA enabled. Continuing on CPU.")
+        parsed_args.gpu = False
+    
+    parsed_args.input = str(os.path.normpath(parsed_args.input))
 
     # Process residue selection
     if parsed_args.residues:
@@ -150,5 +181,4 @@ def parse_args():
         except TypeError as exc:
             raise TypeError("Could not parse a residue (range) as integers.") from exc
 
-    print(parsed_args)
     return parsed_args

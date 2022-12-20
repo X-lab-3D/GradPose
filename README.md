@@ -2,7 +2,9 @@
 
 Welcome to the GitHub repository for the gradPose tool.
 
-This tool is based on the research paper titled **Eliminating Bottlenecks in Protein Structure Superimposition with: GradPose**, published in **Oxford Bioinformatics** in **2022**. The tool is designed to do fast and effient superimpositions of thousands to millions of pdbs (Protein Data Bank files) capable of runnning on standard hardware. Our software is able to overcome the botlenecks of classic strucutral superimpositions algorithms by being able to scale linearly with the number of residues (instead of exponentially) and being able to effiently use multocore matrix operations that can tolerate insertions and deletions intruced by homology moddeling and prediction software. The software supports both CPU and GPU via cuda operations.
+This tool is based on the research paper titled **Eliminating Bottlenecks in Protein Structure Superimposition with: GradPose**, published in **Oxford Bioinformatics** in **2022**. The tool is designed to do fast and effient superimpositions of thousands to millions of pdbs (Protein Data Bank files) capable of runnning on standard hardware.
+
+We introduce gradPose, a novel structural superimposition command line tool and Python package for PDB files. GradPose uses gradient descent, to incrementally approach the optimal rotation matrices for alignment. It is efficient in terms of memory usage and allows fast alignment of thousands to millions of protein structures to a template structure, while also offering precise control over which chain and specific residues to align. GradPose can handle insertions and deletions compared to the template, and utilizes multiple CPU cores to maximize speed. It also has optional CUDA acceleration using a GPU. 
 
 This repository contains the source code and documentation for the gradPose tool. Please refer to the documentation for instructions on how to use the tool and for more information about its features and capabilities.
 

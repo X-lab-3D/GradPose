@@ -21,11 +21,3 @@ From repository:
 ```bash
 pip install git+https://github.com/X-lab-3D/fast-superimposition
 ```
-from conda
-
-1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html)
-2. Create environment using [environment.yml](environment.yml):<br>
-```conda env create -f environment.yml```
-3. Activate environment:<br>
-```conda activate gradPose```
-

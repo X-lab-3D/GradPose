@@ -37,6 +37,7 @@ gradPose example_pdb_folder
 ```
 The aligned proteins are automatically stored in the folder 'output'. Using another folder name, or overwriting the current folder without creating a second is possible using the -o option. 
 
+
 If the pdbs need to be aligned to a specific template:
 ```
 gradPose -i example_pdb_folder -t template_example.pdb

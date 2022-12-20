@@ -21,3 +21,29 @@ From repository:
 ```bash
 pip install git+https://github.com/X-lab-3D/fast-superimposition
 ```
+
+## Examples of usage:
+
+A folder containing N pdbs names 'example_pdb_folder'
+
+```bash
+gradPose -i example_pdb_folder
+```
+or
+```
+gradPose example_pdb_folder
+```
+The aligned proteins are automatically stored in the folder 'output'. Other folder name is possible using the -o option. This also works when you want to overwrite the current folder without creating a second folder.
+
+If the pdbs need to be aligned to a specific template:
+```
+gradPose -i example_pdb_folder -t template_example.pdb
+```
+
+If only a spedific part of the proten needs to be aligned, for exmaple, the first 10 amino-acids and the the aminoacids ranging between 20 and 30:
+
+```
+gradPose -i example_pdb_folder -r 1:10 20:30
+```
+
+etc... Kevin can yo make other examples? or list the options with explanations?

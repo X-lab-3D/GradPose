@@ -2,7 +2,7 @@
 
 Welcome to the GitHub repository for the gradPose tool.
 
-This tool is based on the research paper titled **Eliminating Bottlenecks in Protein Structure Superimposition with: GradPose**, published in **Oxford Bioinformatics** in **2022**. The tool is designed to do fast and effient superimpositions of thousands to millions of pdbs capable of runnning on standard hardware. 
+This tool is based on the research paper titled **Eliminating Bottlenecks in Protein Structure Superimposition with: GradPose**, published in **Oxford Bioinformatics** in **2022**. The tool is designed to do fast and effient superimpositions of thousands to millions of pdbs (Protein Data Bank files) capable of runnning on standard hardware. Our software is able to overcome the botlenecks of classic strucutral superimpositions algorithms by being able to scale linearly with the number of residues (instead of exponentially) and being able to effiently tolerate insertions and deletions intruced by homology moddeling and prediction software. 
 
 This repository contains the source code and documentation for the gradPose tool. Please refer to the documentation for instructions on how to use the tool and for more information about its features and capabilities.
 

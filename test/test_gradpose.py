@@ -20,7 +20,7 @@ class TestGradPose(unittest.TestCase):
         # Ensure we have the right amount of output pdbs.
         self.assertTrue(len(DOCKING_MODELS) == len(glob.glob(os.path.join(tmp_path, "*.pdb"))))
 
-        # Confirm an rmsd file was made
+        # Confirm an rmsd file was made.
         self.assertTrue(os.path.exists(rmsd_path))
 
         # Confirm that all RMSDs are there.
@@ -37,12 +37,12 @@ class TestGradPose(unittest.TestCase):
     def test_docking_package(self):
         """Test GradPose on docking models through the Python package.
         """
-        from gradpose.gradpose import superpose
+        import gradpose
 
         with tempfile.TemporaryDirectory() as tmp_path:
 
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
-            superpose(DOCKING_MODELS, DOCKING_MODELS[0], tmp_path, rmsd_path=rmsd_path)
+            gradpose.superpose(DOCKING_MODELS, DOCKING_MODELS[0], tmp_path, rmsd_path=rmsd_path)
 
             self.assert_docking(tmp_path, rmsd_path)
 

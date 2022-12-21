@@ -2,6 +2,8 @@ import glob
 import os
 import unittest
 import tempfile
+import subprocess
+import gradpose
 
 DOCKING_PATH = "./test/data/docking"
 DOCKING_MODELS = glob.glob(os.path.join(DOCKING_PATH, "*.pdb"))
@@ -37,8 +39,6 @@ class TestGradPose(unittest.TestCase):
     def test_docking_package(self):
         """Test GradPose on docking models through the Python package.
         """
-        import gradpose
-
         with tempfile.TemporaryDirectory() as tmp_path:
 
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
@@ -51,9 +51,6 @@ class TestGradPose(unittest.TestCase):
     def test_docking_cmd(self):
         """Test GradPose on docking models through the command line.
         """
-        import subprocess
-        import os
-
         with tempfile.TemporaryDirectory() as tmp_path:
 
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
@@ -64,27 +61,27 @@ class TestGradPose(unittest.TestCase):
 
 
     def test_params_cmd(self):
-        """Test GradPose on docking models through the command line, using all available parameters (excluding --silent).
+        """Test GradPose on docking models through the command line,
+        using all available parameters (excluding --silent).
         """
-        import subprocess
-        import os
-
         with tempfile.TemporaryDirectory() as tmp_path:
 
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
-            subprocess.run(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "-r", "10:50", "-c", "A", "-n", "1", "-g", "-b", "100", "--verbose", "--rmsd"], check=True)
+            subprocess.run(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "-r", "10:50",
+            "-c", "A", "-n", "1", "-g", "-b", "100", "--verbose", "--rmsd"], check=True)
 
             # Confirm that superposition worked.
             self.assert_docking(tmp_path, rmsd_path)
 
     def test_silent_cmd(self):
-        import subprocess
-        import os
-
+        """Test if silent parameter works as intended.
+        """
         with tempfile.TemporaryDirectory() as tmp_path:
 
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
-            process = subprocess.Popen(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "--silent", "--rmsd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(["gradpose", "-i", DOCKING_PATH,
+            "-o", tmp_path, "--silent", "--rmsd"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             # Confirm no output was created on stdout or stderr.
             stdout, stderr = process.communicate()

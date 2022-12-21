@@ -6,22 +6,17 @@ import glob
 import time
 import os
 import math
-import sys
 from itertools import repeat
 import numpy as np
 import torch
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 from tqdm import tqdm, trange
-import pdb2sql
 from gradpose import util
 
-# TODO: Don't forget to change chain from 72 to 21
-# TODO: Update pyproject.toml dependencies and everything else
 # TODO: Consistent bar lengths (bar_format=)
 # TODO: Argument to overwrite original files
 # TODO: Check all of the docstrings, some arguments are be different!
-# TODO: RMSD of each model vs template, write to file. Enable as a parameter.
 
 class Rotator():
     """The Rotation module with all learnable parameters.
@@ -156,7 +151,8 @@ class Rotator():
 class PDBdataset():
     """Class that processes PDBs.
     """
-    def __init__(self, pdbs, template_pdb, residues, chain, cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
+    def __init__(self, pdbs, template_pdb, residues, chain,
+            cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
         """Initializes the PDBdataset object.
 
         Args:
@@ -415,7 +411,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
     if verbosity > 0:
         start_time = time.perf_counter()
         print("\n=== Superimpose ===")
-    
+
     torch.set_num_threads(cores)
 
     # for REPRODUCIBILITY

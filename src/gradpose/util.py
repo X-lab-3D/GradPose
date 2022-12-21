@@ -160,9 +160,10 @@ def parse_args():
         warnings.warn(f"Argument Warning: Batch size limited to {parsed_args.batch_size}")
 
     if parsed_args.gpu and not torch.cuda.is_available():
-        warnings.warn("Argument Warning: Attempted to enable CUDA but PyTorch is not compiled with CUDA enabled. Continuing on CPU.")
+        warnings.warn("Argument Warning: Attempted to enable CUDA" + \
+        " but PyTorch is not compiled with CUDA enabled. Continuing on CPU.")
         parsed_args.gpu = False
-    
+
     parsed_args.input = str(os.path.normpath(parsed_args.input))
 
     # Process residue selection

@@ -156,7 +156,7 @@ class Rotator():
 class PDBdataset():
     """Class that processes PDBs.
     """
-    def __init__(self, pdbs, template_pdb, residues, chain, cores=1, output='result', device='cpu', verbosity=1):
+    def __init__(self, pdbs, template_pdb, residues, chain, cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
         """Initializes the PDBdataset object.
 
         Args:
@@ -225,7 +225,7 @@ class PDBdataset():
             print(f'Retrieved data, time: {time.perf_counter()-t0:.2f} seconds')
 
         # Instantiate a Rotator
-        self.rotator = Rotator(xyz, del_mask)
+        self.rotator = Rotator(xyz, del_mask, device=self.device)
 
     def _extract_pdb_atoms(self, file_name):
         """Extract all atom xyz coordinates
@@ -364,6 +364,7 @@ class PDBdataset():
                 .div(combined_masks.sum(1).squeeze()).sqrt()
 
             with open(output_file, 'a', encoding='utf-8') as rmsd_file:
+                rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
                 rmsd_file.write("\n".join([
                     f"{os.path.basename(pdb)}\t{rmsds[i].item()}"
                     for i, pdb in enumerate(self.pdbs[1:])
@@ -393,7 +394,7 @@ class PDBdataset():
             print(f'Steps: {step+1}, alignment-time: {time.perf_counter()-t0:.2f}')
 
 
-def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores=4,
+def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores=mp.cpu_count(),
     batch_size=50000, gpu=False, rmsd_path=None, verbosity=1):
     """Runs all the steps to superpose a list of PDBs.
 
@@ -489,8 +490,6 @@ def main():
 
     if arguments.rmsd:
         arguments.rmsd = os.path.join(arguments.output, "rmsd.tsv")
-        with open(arguments.rmsd, 'w', encoding='utf-8') as rmsd_file:
-            rmsd_file.write(f"Template\t{pdbs_list[0]}\n")
 
     superpose(
         pdbs_list,

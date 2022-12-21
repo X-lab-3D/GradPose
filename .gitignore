@@ -1,15 +1,15 @@
 .idea/
-mhc1/
-mhc1_copied/
-out/
-out_all/
-output/
-root/
-venv/
-data/
-1A1M.pdb
-mhc1.zip
-.pylintrc
+./mhc1/
+./mhc1_copied/
+./out/
+./out_all/
+./output/
+./root/
+./venv/
+./data/
+./1A1M.pdb
+./mhc1.zip
+./.pylintrc
 
 
 # Byte-compiled / optimized / DLL files

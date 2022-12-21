@@ -3,10 +3,10 @@ Utility function(s) moved here to declutter the main file.
 """
 import sys
 import os
+import warnings
 from argparse import ArgumentParser
 import torch.multiprocessing as mp
 import torch.cuda
-import torch._C
 
 def parse_args():
     """Parses and processes the command line arguments.
@@ -91,7 +91,7 @@ def parse_args():
     arg_parser.add_argument("-n", "--n-cores",
         help="""
         (Optional) Number of CPU cores to use for multiprocessing.
-        Defaults to 1.
+        Defaults to the amount of cores on the system.
         """,
         type=int,
         default=mp.cpu_count()
@@ -153,14 +153,14 @@ def parse_args():
 
     if parsed_args.n_cores > mp.cpu_count():
         parsed_args.n_cores = mp.cpu_count()
-        print(f"Argument Warning: CPU cores limited to {parsed_args.n_cores}.")
+        warnings.warn(f"Argument Warning: CPU cores limited to {parsed_args.n_cores}.")
 
     if parsed_args.batch_size > 50000:
         parsed_args.batch_size = 50000
-        print(f"Argument Warning: Batch size limited to {parsed_args.batch_size}")
+        warnings.warn(f"Argument Warning: Batch size limited to {parsed_args.batch_size}")
 
-    if parsed_args.gpu and not hasattr(torch._C, '_cuda_getDeviceCount'):
-        print("Argument Warning: Attempted to enable CUDA but PyTorch is not compiled with CUDA enabled. Continuing on CPU.")
+    if parsed_args.gpu and not torch.cuda.is_available():
+        warnings.warn("Argument Warning: Attempted to enable CUDA but PyTorch is not compiled with CUDA enabled. Continuing on CPU.")
         parsed_args.gpu = False
     
     parsed_args.input = str(os.path.normpath(parsed_args.input))

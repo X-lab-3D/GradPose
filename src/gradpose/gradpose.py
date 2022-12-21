@@ -480,6 +480,9 @@ def main():
     else:
         pdbs_list += glob.glob(str(os.path.join(arguments.input, '*.pdb')))
 
+    if not pdbs_list:
+        raise Exception("Specified folder does not contain .pdb files.")
+
     # Sort the files alphabetically
     pdbs_list.sort(key=str.lower)
 

@@ -364,6 +364,7 @@ class PDBdataset():
                 .div(combined_masks.sum(1).squeeze()).sqrt()
 
             with open(output_file, 'a', encoding='utf-8') as rmsd_file:
+                rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
                 rmsd_file.write("\n".join([
                     f"{os.path.basename(pdb)}\t{rmsds[i].item()}"
                     for i, pdb in enumerate(self.pdbs[1:])
@@ -489,8 +490,6 @@ def main():
 
     if arguments.rmsd:
         arguments.rmsd = os.path.join(arguments.output, "rmsd.tsv")
-        with open(arguments.rmsd, 'w', encoding='utf-8') as rmsd_file:
-            rmsd_file.write(f"Template\t{pdbs_list[0]}\n")
 
     superpose(
         pdbs_list,

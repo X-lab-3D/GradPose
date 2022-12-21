@@ -3,10 +3,10 @@ Utility function(s) moved here to declutter the main file.
 """
 import sys
 import os
+from argparse import ArgumentParser
 import torch.multiprocessing as mp
 import torch.cuda
 import torch._C
-from argparse import ArgumentParser
 
 def parse_args():
     """Parses and processes the command line arguments.
@@ -19,13 +19,12 @@ def parse_args():
         # TODO: Improve description
     )
 
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 2 and sys.argv[1] not in ["-h", "--help"]:
         sys.argv.insert(1, "-i")
     arg_parser.add_argument("-i", "--input",
         help="""
         Folder containing the PDB models. -i or --input can be left out if calling superpose with only an input folder.
         """,
-        required=True,
         type=str
     )
     arg_parser.add_argument("-s", "--subfolders",
@@ -69,13 +68,13 @@ def parse_args():
         type=str,
         default=None
     )
-    arg_parser.add_argument("-f", "--full-backbone",
-        help="""
-        (Optional) Add this option to align using all backbone atoms.
-        By default, the aligning algorithm only uses the CA atoms of the backbone.
-        """,
-        action='store_true'
-    )
+    # arg_parser.add_argument("-f", "--full-backbone",
+    #     help="""
+    #     (Optional) Add this option to align using all backbone atoms.
+    #     By default, the aligning algorithm only uses the CA atoms of the backbone.
+    #     """,
+    #     action='store_true'
+    # )
     arg_parser.add_argument("-n", "--n-cores",
         help="""
         (Optional) Number of CPU cores to use for multiprocessing.
@@ -121,13 +120,13 @@ def parse_args():
         action="store_true"
     )
 
+    # Parse the arguments
+    parsed_args = arg_parser.parse_args()
+
     # Print help if no arguments are used
     if len(sys.argv) < 2:
         arg_parser.print_help()
         sys.exit()
-
-    # Parse the arguments
-    parsed_args = arg_parser.parse_args()
 
     # Determine verbosity level
     # 0 = silent

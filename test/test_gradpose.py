@@ -44,6 +44,7 @@ class TestGradPose(unittest.TestCase):
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
             gradpose.superpose(DOCKING_MODELS, DOCKING_MODELS[0], tmp_path, rmsd_path=rmsd_path)
 
+            # Confirm that superposition worked.
             self.assert_docking(tmp_path, rmsd_path)
 
 
@@ -58,8 +59,40 @@ class TestGradPose(unittest.TestCase):
             rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
             subprocess.run(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "--rmsd"], check=True)
 
+            # Confirm that superposition worked.
             self.assert_docking(tmp_path, rmsd_path)
 
+
+    def test_params_cmd(self):
+        """Test GradPose on docking models through the command line, using all available parameters (excluding --silent).
+        """
+        import subprocess
+        import os
+
+        with tempfile.TemporaryDirectory() as tmp_path:
+
+            rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
+            subprocess.run(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "-r", "10:50", "-c", "A", "-n", "1", "-g", "-b", "100", "--verbose", "--rmsd"], check=True)
+
+            # Confirm that superposition worked.
+            self.assert_docking(tmp_path, rmsd_path)
+
+    def test_silent_cmd(self):
+        import subprocess
+        import os
+
+        with tempfile.TemporaryDirectory() as tmp_path:
+
+            rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
+            process = subprocess.Popen(["gradpose", "-i", DOCKING_PATH, "-o", tmp_path, "--silent", "--rmsd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            # Confirm no output was created on stdout or stderr.
+            stdout, stderr = process.communicate()
+            self.assertTrue(len(stdout) == 0)
+            self.assertTrue(len(stderr) == 0)
+
+            # Confirm that superposition worked.
+            self.assert_docking(tmp_path, rmsd_path)
 
 if __name__ == "__main__":
     unittest.main()

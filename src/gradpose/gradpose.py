@@ -14,7 +14,7 @@ import torch.multiprocessing as mp
 import torch.nn.functional as F
 from tqdm import tqdm, trange
 import pdb2sql
-from superpose import util
+from gradpose import util
 
 # TODO: Don't forget to change chain from 72 to 21
 # TODO: Update pyproject.toml dependencies and everything else

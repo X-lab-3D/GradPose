@@ -21,12 +21,12 @@ from gradpose import util
 class Rotator():
     """The Rotation module with all learnable parameters.
     """
-    def __init__(self, xyz, del_mask, center=None, quaternions=None, device='cpu', use_numpy=False):
+    def __init__(self, xyz, presence_mask, center=None, quaternions=None, device='cpu', use_numpy=False):
         """Initializes the Rotator object.
 
         Args:
             xyz (torch.Tensor): Coordinates for each atom for each PDB.
-            del_mask (torch.Tensor): A mask to zero out missing atoms when optimizing.
+            presence_mask (torch.Tensor): A mask to zero out missing atoms when optimizing.
             center (torch.Tensor, optional): Alternative center coordinates to use for each PDB.
                 Shape=(No. of PDBs, 3) Defaults to None.
             quaternions (torch.Tensor, optional): Alternative quaternions to set for each PDB.
@@ -34,10 +34,10 @@ class Rotator():
         """
         self.device = device
         # Rotation is always over the center of the pdb structures
-        self.center = self.get_center(xyz, del_mask) \
+        self.center = self.get_center(xyz, presence_mask) \
             if center is None else center.to(self.device)
         self.xyz = xyz - self.center
-        self.del_mask = del_mask
+        self.presence_mask = presence_mask
         self.nmb_samples  = self.xyz.shape[0]
         if use_numpy:
             self.quaternions = np.random.rand(self.nmb_samples, 4) \
@@ -58,17 +58,17 @@ class Rotator():
         # self.history niet meer in de code staat
         # self.history = []
 
-    def get_center(self, xyz, del_mask):
+    def get_center(self, xyz, presence_mask):
         """Get the centers of each PDB. Ignoring missing residues.
 
         Args:
             xyz (torch.Tensor): PDB coordinates.
-            del_mask (torch.Tensor): Loss mask for each PDB.
+            presence_mask (torch.Tensor): Loss mask for each PDB.
 
         Returns:
             torch.Tensor: Tensor with the center of each PDB.
         """
-        return (xyz*del_mask).sum(1).div(del_mask.sum(1)).reshape(-1,1,3)
+        return (xyz*presence_mask).sum(1).div(presence_mask.sum(1)).reshape(-1,1,3)
 
     def get_matrix(self):
         """Get the rotation matrix using the learned quaternions
@@ -125,7 +125,7 @@ class Rotator():
     def _loss(self):
         """Calculate the loss by comparing the rotated coordinates with the template's."""
         new_xyz = self.get_rotated_xyz()
-        loss =  F.mse_loss(new_xyz, self.xyz[0], reduction='none') * self.del_mask
+        loss =  F.mse_loss(new_xyz, self.xyz[0], reduction='none') * self.presence_mask
         loss = loss.mean(2)
         loss = loss.mean(1)
         # self.history += [[i.item() for i in loss]]
@@ -216,12 +216,12 @@ class PDBdataset():
             print(f"Number of 3D Models: {len(self.pdbs)}")
             print('Start loading data')
         t0 = time.perf_counter()
-        xyz, del_mask = self.load_ca_atom_positions()
+        xyz, presence_mask = self.load_ca_atom_positions()
         if self.verbosity > 1:
             print(f'Retrieved data, time: {time.perf_counter()-t0:.2f} seconds')
 
         # Instantiate a Rotator
-        self.rotator = Rotator(xyz, del_mask, device=self.device)
+        self.rotator = Rotator(xyz, presence_mask, device=self.device)
 
     def _extract_pdb_atoms(self, file_name):
         """Extract all atom xyz coordinates
@@ -283,8 +283,8 @@ class PDBdataset():
                     total=len(self.pdbs), desc="Extracting backbones",
                     disable=self.verbosity!=1
                 )))).float().to(self.device)
-        del_mask = (ca_xyz.abs().sum(2) != 0).unsqueeze(2).float().to(self.device)
-        return ca_xyz, del_mask
+        presence_mask = (ca_xyz.abs().sum(2) != 0).unsqueeze(2).float().to(self.device)
+        return ca_xyz, presence_mask
 
     def _rotate_single_pdb(self, pdb_index, rotation_matrix):
         """Rotate a PDB by the quaternions of the Rotator and save the resulting PDB to a file.
@@ -354,7 +354,7 @@ class PDBdataset():
         with torch.no_grad():
             rotated_xyz = self.rotator.get_rotated_xyz()
             pdb_range = torch.arange(start=1, end=len(self.pdbs))
-            combined_masks = self.rotator.del_mask[0] * self.rotator.del_mask[pdb_range]
+            combined_masks = self.rotator.presence_mask[0] * self.rotator.presence_mask[pdb_range]
             rmsds = ((rotated_xyz[0] - rotated_xyz[pdb_range]) * combined_masks)\
                 .pow(2).reshape(len(self.pdbs)-1, -1).sum(1)\
                 .div(combined_masks.sum(1).squeeze()).sqrt()

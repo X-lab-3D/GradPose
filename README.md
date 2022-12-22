@@ -10,7 +10,7 @@ We hope that this tool will be useful to researchers and practitioners in the fi
 
 ## Install
 
-From PyPI with pip:
+From PyPI with pip: (Coming Soon)
     
 ```
 pip install gradpose

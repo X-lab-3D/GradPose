@@ -54,9 +54,7 @@ class Rotator():
 
         self.optimizer = torch.optim.SGD([self.quaternions], lr=self.learning_rate)
         self.use_numpy = use_numpy
-        # TODO, nadat je klaar bent met experimenteren zorgen dat de
-        # self.history niet meer in de code staat
-        # self.history = []
+
 
     def get_center(self, xyz, presence_mask):
         """Get the centers of each PDB. Ignoring missing residues.
@@ -414,6 +412,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
 
     torch.set_num_threads(cores)
 
+    # TODO: Do we keep this?
     # for REPRODUCIBILITY
     warnings.filterwarnings("ignore")
 
@@ -442,22 +441,9 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
             verbosity
         )
         data_processor.optimize()
-        # import cProfile
-        # import pstats
-        # with cProfile.Profile() as p:
         data_processor.rotate_all_pool()
-        # torch.save(data_processor, "data_processor.pt")
-        # quit()
         if rmsd_path:
             data_processor.calc_rmsd_with_template(rmsd_path)
-        # stats = pstats.Stats(p)
-        # stats.sort_stats(pstats.SortKey.TIME)
-        # stats.print_stats()
-        # import pylab as plt
-        # plt.plot(data_processor.rotator.history)
-        # plt.show()
-        # Free memory
-        # del data_processor
 
     if verbosity > 0:
         end_time = time.perf_counter()

@@ -47,4 +47,4 @@ If only a spedific part of the proten needs to be aligned, for exmaple, the firs
 gradpose -i example_pdb_folder -r 1:10 12 20:30
 ```
 
-etc... Kevin can yo make other examples? or list the options with explanations?
+(Instructions for options coming soon.)

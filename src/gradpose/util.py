@@ -28,15 +28,15 @@ def parse_args():
         more efficient than traditional methods, which tend to scale exponentially with the
         number of residues and process the pbds individually. Furthermore, if a GPU is available,
         it can use CUDA acceleration.
-"""
-        # TODO: Improve description
+        """
     )
 
     if len(sys.argv) == 2 and sys.argv[1] not in ["-h", "--help"]:
         sys.argv.insert(1, "-i")
     arg_parser.add_argument("-i", "--input",
         help="""
-        Folder containing the PDB models. -i or --input can be left out if calling superpose with only an input folder.
+        Folder containing the PDB models. -i or --input can be left out
+        if calling superpose with only an input folder.
         """,
         type=str
     )
@@ -67,7 +67,8 @@ def parse_args():
     )
     arg_parser.add_argument("-c", "--chain",
         help="""
-        (Optional) The chain ID to use for alignment. Defaults to the longest chain of the template.
+        (Optional) The chain ID to use for alignment.
+        Defaults to the longest chain of the template.
         """,
         type=str,
         default=None
@@ -75,7 +76,8 @@ def parse_args():
     arg_parser.add_argument("-r", "--residues",
         help="""
         (Optional) List of residue numbers to use for alignment. Separated by spaces.
-        Indicate ranges as: start:stop (Including start and stop.) Defaults to all residues in the selected chain of the template.
+        Indicate ranges as: start:stop (Including start and stop.)
+        Defaults to all residues in the selected chain of the template.
         """,
         nargs='+',
         type=str,
@@ -128,7 +130,8 @@ def parse_args():
 
     arg_parser.add_argument("--rmsd",
         help="""
-        (Optional) Calculate RMSD between template and models (only at selected residues) and save the results as rmsd.tsv in the output folder.
+        (Optional) Calculate RMSD between template and models (only at selected residues)
+        and save the results as rmsd.tsv in the output folder.
         """,
         action="store_true"
     )

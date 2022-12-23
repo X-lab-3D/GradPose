@@ -9,7 +9,7 @@ authors = [
   { name="Daniel Rademaker", email="author@example.com" },
   { name="Kevin van Geemen", email="kevinvg207business@gmail.com" }
 ]
-description = "GradPose is a novel structural superimposition command-line tool and Python package for PDB files. GradPose uses gradient descent to incrementally approach the optimal rotation matrices (via quaternions) for alignment. It is memory efficient and enables for the quick alignment of thousands to millions of protein structures to a template structure while also providing exact control over which chain and specific residues to align. The tool is designed to overcome the limitations of classical superimposition algorithms, which are not equipped to handle the large number of PDB files produced by researchers today. Our method scales linearly with the number of residues and can also use batch matrix operations effectively even when there are amino-acid insertions or deletions. This makes it more efficient than traditional methods, which tend to scale exponentially with the number of residues and process the pbds individually. Furthermore, if a GPU is available, it can use CUDA acceleration."
+description = "GradPose is a novel structural superimposition command-line tool and Python package for PDB files. GradPose uses gradient descent to incrementally approach the optimal rotation matrices (via quaternions) for alignment. It is memory efficient and enables for the quick alignment of thousands to millions of protein structures to a template structure while also providing exact control over which chain and specific residues to align. If a GPU is available, it can use CUDA acceleration."
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [

@@ -10,17 +10,12 @@ We hope that this tool will be useful to researchers and practitioners in the fi
 
 ## Install
 
-From PyPI with pip: (Coming Soon)
+Install GradPose from PyPI with pip:
     
 ```
 pip install gradpose
 ```
 
-From repository with pip:
-    
-```
-pip install git+https://github.com/X-lab-3D/fast-superimposition
-```
 
 ## Examples of usage:
 

@@ -1,5 +1,6 @@
 """
-PDB Superimposition
+GradPose: PDB Superimposition using Gradient Descent
+Authors: Daniel Rademaker, Kevin van Geemen
 """
 import warnings
 import glob
@@ -21,7 +22,8 @@ from gradpose import util
 class Rotator():
     """The Rotation module with all learnable parameters.
     """
-    def __init__(self, xyz, presence_mask, center=None, quaternions=None, device='cpu', use_numpy=False):
+    def __init__(self, xyz, presence_mask, center=None, quaternions=None,
+        device='cpu', use_numpy=False):
         """Initializes the Rotator object.
 
         Args:
@@ -30,8 +32,10 @@ class Rotator():
             center (torch.Tensor, optional): Alternative center coordinates to use for each PDB.
                 Shape=(No. of PDBs, 3) Defaults to None.
             quaternions (torch.Tensor, optional): Alternative quaternions to set for each PDB.
-                Shape=(No. of PDBs, 4) Defaults to None.
+            device (str, optional): The device tensors will be stored on. Defaults to 'cpu'.
+            use_numpy (bool, optional): Whether to use numpy instead of pytorch. Defaults to False.
         """
+
         self.device = device
         # Rotation is always over the center of the pdb structures
         self.center = self.get_center(xyz, presence_mask) \
@@ -97,11 +101,16 @@ class Rotator():
         """Returns the PDB coordinates after rotating by the Rotator's quaternions.
 
         Args:
-            pdb_index (int, optional): _description_. Defaults to None.
+            pdb_index (int, optional): If manually supplying xyz and rotation_matrix,
+                the index to use. Defaults to None.
+            xyz (torch.Tensor, optional): Override the coordinates matrix. Defaults to None.
+            rotation_matrix (torch.Tensor, optional): Override the rotation matrix.
+                Defaults to None.
 
         Returns:
-            torch.Tensor: Rotated PDB coordinates.
+            torch.Tensor: Rotated coordinates.
         """
+
         if rotation_matrix is None:
             # Retrieve rotation matrix
             rotation_matrix = self.get_matrix()
@@ -116,7 +125,14 @@ class Rotator():
         return torch.matmul(self.xyz, rotation_matrix)
 
     def _normalize(self, quaternions):
-        """Normalize vector (vector.pow(2).sum()==1)"""
+        """Normalize quaternions.
+
+        Args:
+            quaternions (torch.Tensor): Matrix of quaternions.
+
+        Returns:
+            torch.Tensor: Normalized quaternions.
+        """
         quaternions = quaternions / quaternions.norm(dim=1).reshape(-1,1)
         return quaternions
 
@@ -151,16 +167,18 @@ class PDBdataset():
     """
     def __init__(self, pdbs, template_pdb, residues, chain,
             cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
-        """Initializes the PDBdataset object.
+        """_summary_
 
         Args:
-            pdb_input_folder (str): Folder where the PDB files are located.
+            pdbs (str): Folder where the PDB files are located.
             template_pdb (str): Path to the template PDB.
             residues (list[int]): List of residue IDs to be used for alignment.
             chain (str): Chain ID to be used for alignment.
-            cores (int, optional): Amount of CPU cores to use for multiprocessing. Defaults to 1.
-            subfolders (bool, optional): Look for .pdb files in subfolders of pdb_input_folder.
-                Defaults to False.
+            cores (int, optional): Amount of CPU cores to use for multiprocessing.
+                Defaults to the amount of cores on the system.
+            output (str, optional): Path to output folder. Defaults to 'result'.
+            device (str, optional): Device to store the tensors on. Defaults to 'cpu'.
+            verbosity (int, optional): Verbosity level. Defaults to 1.
         """
         self.device = device
         self.verbosity = verbosity
@@ -348,6 +366,9 @@ class PDBdataset():
     def calc_rmsd_with_template(self, output_file):
         """Calculates the RMSD of each aligned PDB with the template.
         Only takes into account the selected residues and ignores any deletions.
+
+        Args:
+            output_file (str): Path to write to.
         """
         with torch.no_grad():
             rotated_xyz = self.rotator.get_rotated_xyz()
@@ -394,15 +415,16 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
 
     Args:
         pdbs_list (list): List of paths to PDB files.
-        output (str): Output folder.
         template (str): Template PDB path.
-        residues (list): List of residue indices to align to.
-        chain (str): Chain to align to.
-        cores (int, optional): The number of CPU cores to use for multiprocessing. Defaults to 4.
+        output (str, optional): Folder to write the rotated PDBs. Defaults to None.
+        residues (list, optional): List of residue indices to align to. Defaults to None.
+        chain (str, optional): Chain to align to.. Defaults to None.
+        cores (int, optional): The number of CPU cores to use for multiprocessing.
+            Defaults to the amount of cores on the system.
         batch_size (int, optional): The batch size of the alignment. Defaults to 50000.
-        device (str, optional): The device to use for PyTorch tensors. Defaults to 'cpu'.
-        rmsd_path (str, optional): The path to write RMSDs to (compared to template).
-            Leave None to skip RMSD calculation. Defaults to None.
+        gpu (bool, optional): Flag to indicate whether GPU should be utilized. Defaults to False.
+        rmsd_path (str, optional): If set, will write RMSDs of all models
+            compared to the template. Defaults to None.
         verbosity (int, optional): Verbosity level. 0 = Silent, 1 = Normal, 2 = Verbose.
             Defaults to 1.
     """

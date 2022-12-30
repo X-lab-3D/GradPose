@@ -15,9 +15,8 @@ GradPose requires [Python 3](https://www.python.org/downloads/) to be installed 
 
 ## Install
 
-Install GradPose from PyPI with pip:
-    
-```
+Install GradPose using Python's package installer pip:
+```sh
 pip install gradpose
 ```
 
@@ -33,8 +32,8 @@ Alternatively, you can examine the example usages listed below.
 ## Example usages
 
 ### Input
-A folder containing N PDBs named 'example_folder'
-
+To use GradPose, specify a folder folder containing any amount of PDBs to be used for alignment using the ``-i`` argument.
+For example, let's use a folder named 'example_folder'.
 ```sh
 gradpose -i example_folder
 ```

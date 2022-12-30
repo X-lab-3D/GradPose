@@ -68,7 +68,7 @@ gradpose -i example_folder -c B
 
 ### Residues
 By default, GradPose aligns to all residues of the selected chain. If a finer selection can be made with the ``-r`` argument.
-For exmaple, to align on the first 10 amino-acids, animo-acids 12 and 14, and the the aminoacids ranging between (and including) 20 and 30 of chain B:
+For example, to align on the first 10 residues, residues 12 and 14, and the residues ranging between (and including) 20 and 30 of chain B:
 ```sh
 gradpose -i example_folder -c B -r 1:10 12 14 20:30
 ```

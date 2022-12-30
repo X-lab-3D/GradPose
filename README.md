@@ -17,29 +17,89 @@ pip install gradpose
 ```
 
 
-## Examples of usage:
+## Usage
 
-A folder containing N PDBs named 'example_pdb_folder'
-
+```sh
+gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-g] [-b BATCH_SIZE] [--silent] [--verbose] [--rmsd]
 ```
-gradpose -i example_pdb_folder
+Help and defaults for each argument can be seen executing GradPose with the help argument: ``gradpose -h``.
+Alternatively, you can examine the example usages listed below.
+
+## Example usages
+
+### Input
+A folder containing N PDBs named 'example_folder'
+
+```sh
+gradpose -i example_folder
 ```
 or
+```sh
+gradpose example_folder
 ```
-gradpose example_pdb_folder
+Note: Omitting ``-i`` is only possible if no other arguments are used.
+Note: The aligned proteins are automatically stored in the folder 'output'.
+
+### Output
+Using another folder name, or overwriting the current folder without creating a second is possible using the ``-o`` argument.
+```sh
+gradpose -i example_folder -o example_output_folder
 ```
-The aligned proteins are automatically stored in the folder 'output'. Using another folder name, or overwriting the current folder without creating a second is possible using the -o option. 
+Note: To overwrite the current files, provide the same input and output folder.
 
 
-If the pdbs need to be aligned to a specific template:
+### Template
+If the PDBs in folder 'example_folder' need to be aligned to a specific template, use the ``-t`` argument:
+```sh
+gradpose -i example_folder -t example_folder/template_example.pdb
 ```
-gradpose -i example_pdb_folder -t template_example.pdb
+Note: The template **does not** need to be in the same folder as the PDBs used for alignment.
+
+### Chain
+By default, GradPose aligns to the longest chain in the template PDB. You can choose a chain ID with the ``-c`` argument.
+In this example, the alignment is done on all residues of chain B:
+```sh
+gradpose -i example_folder -c B
 ```
 
-If only a spedific part of the proten needs to be aligned, for exmaple, the first 10 amino-acids, animo-acids 12, and the the aminoacids ranging between (and including) 20 and 30:
-
+### Residues
+By default, GradPose aligns to all residues of the selected chain. If a finer selection can be made with the ``-r`` argument.
+For exmaple, to align on the first 10 amino-acids, animo-acids 12 and 14, and the the aminoacids ranging between (and including) 20 and 30 of chain B:
+```sh
+gradpose -i example_folder -c B -r 1:10 12 14 20:30
 ```
-gradpose -i example_pdb_folder -r 1:10 12 20:30
+
+### CPU Cores
+By default, GradPose utilizes all CPU cores on the system. To manually specify the amount of cores, use ``-n``.
+```sh
+gradpose -i example_folder -n 4
 ```
 
-(Instructions for options coming soon.)
+### Batch Size
+By default, the batch size is set to 50,000 to limit memory usage. To set a lower batch size, use the ``-b`` argument.
+```sh
+gradpose -i example_folder -b 1000
+```
+
+### CUDA Acceleration
+GPU acceleration is disabled by default. If you have a PyTorch installation with CUDA enabled, simply add the ``--gpu`` flag to the command to enable GPU acceleration.
+```sh
+gradpose -i example_folder --gpu
+```
+
+### RMSD Calculation
+GradPose can automatically calculate the RMSD of the residues on which it aligns compared to the template for every PDB. This feature can be enabled using the ``--rmsd`` flag. The results will be saved as 'rmsd.tsv' in the output folder.
+```sh
+gradpose -i example_folder --rmsd
+```
+
+### Verbosity levels
+GradPose allows the user to choose to run the tool silently, without generating any output in the console, with the ``--silent`` flag.
+```sh
+gradpose -i example_folder --silent
+```
+
+Alternatively, more verbose console output may be enabled with ``--verbose``.
+```sh
+gradpose -i example_folder --verbose
+```

@@ -98,15 +98,6 @@ def parse_args():
         type=int,
         default=mp.cpu_count()
     )
-
-    arg_parser.add_argument("-g", "--gpu",
-        help="""
-        (Optional) Enable CUDA accelleration for alignment.
-        Requires a PyTorch installation that supports CUDA.
-        """,
-        action='store_true'
-    )
-
     arg_parser.add_argument("-b", "--batch-size",
         help="""
         (Optional) Number of PDB files to align per batch.
@@ -114,6 +105,20 @@ def parse_args():
         """,
         type=int,
         default=50000
+    )
+    arg_parser.add_argument("--gpu",
+        help="""
+        (Optional) Enable CUDA accelleration for alignment.
+        Requires a PyTorch installation that supports CUDA.
+        """,
+        action='store_true'
+    )
+    arg_parser.add_argument("--rmsd",
+        help="""
+        (Optional) Calculate RMSD between template and models (only at selected residues)
+        and save the results as rmsd.tsv in the output folder.
+        """,
+        action="store_true"
     )
     arg_parser.add_argument("--silent",
         help="""
@@ -126,14 +131,6 @@ def parse_args():
         (Optional) Print extra information.
         """,
         action='store_true'
-    )
-
-    arg_parser.add_argument("--rmsd",
-        help="""
-        (Optional) Calculate RMSD between template and models (only at selected residues)
-        and save the results as rmsd.tsv in the output folder.
-        """,
-        action="store_true"
     )
 
     # Parse the arguments

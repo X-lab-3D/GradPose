@@ -8,6 +8,11 @@ This repository contains the source code and documentation for the GradPose tool
 
 We hope that this tool will be useful to researchers and practitioners in the field of bioinformatics. If you have any questions or suggestions, please don't hesitate to open an issue or submit a pull request. We welcome contributions and feedback from the community.
 
+
+## Dependencies
+GradPose requires [Python 3](https://www.python.org/downloads/) to be installed on your system.
+
+
 ## Install
 
 Install GradPose from PyPI with pip:
@@ -22,7 +27,7 @@ pip install gradpose
 ```sh
 gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-g] [-b BATCH_SIZE] [--silent] [--verbose] [--rmsd]
 ```
-Help and defaults for each argument can be seen executing GradPose with the help argument: ``gradpose -h``.
+Help and defaults for each argument can be viewed by executing GradPose with the help argument: ``gradpose -h``.
 Alternatively, you can examine the example usages listed below.
 
 ## Example usages
@@ -93,7 +98,7 @@ GradPose can automatically calculate the RMSD of the residues on which it aligns
 gradpose -i example_folder --rmsd
 ```
 
-### Verbosity levels
+### Verbosity Levels
 GradPose allows the user to choose to run the tool silently, without generating any output in the console, with the ``--silent`` flag.
 ```sh
 gradpose -i example_folder --silent

@@ -24,7 +24,7 @@ pip install gradpose
 ## Usage
 
 ```sh
-gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-g] [-b BATCH_SIZE] [--silent] [--verbose] [--rmsd]
+gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-b BATCH_SIZE] [--gpu] [--rmsd] [--silent] [--verbose]
 ```
 Help and defaults for each argument can be viewed by executing GradPose with the help argument: ``gradpose -h``.
 Alternatively, you can examine the example usages listed below.

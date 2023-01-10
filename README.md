@@ -51,7 +51,6 @@ gradpose -i example_folder -o example_output_folder
 ```
 Note: To overwrite the current files, provide the same input and output folder.
 
-
 ### Template
 If the PDBs in folder 'example_folder' need to be aligned to a specific template, use the ``-t`` argument:
 ```sh

@@ -466,6 +466,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
         data_processor.rotate_all_pool()
         if rmsd_path:
             data_processor.calc_rmsd_with_template(rmsd_path)
+        del data_processor
 
     if verbosity > 0:
         end_time = time.perf_counter()

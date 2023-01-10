@@ -447,7 +447,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
     else:
         device = torch.device("cpu")
 
-    if os.path.exists(rmsd_path):
+    if rmsd_path and os.path.exists(rmsd_path):
         os.remove(rmsd_path)
 
     num_batches = math.ceil(len(pdbs_list)/batch_size)
@@ -469,7 +469,6 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
         data_processor.rotate_all_pool()
         if rmsd_path:
             data_processor.calc_rmsd_with_template(rmsd_path)
-        # del data_processor
 
     if verbosity > 0:
         end_time = time.perf_counter()

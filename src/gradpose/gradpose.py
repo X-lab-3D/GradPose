@@ -363,7 +363,7 @@ class PDBdataset():
         if self.verbosity > 1:
             print(f'Rotating and saving data took: {time.perf_counter() - t0:.2f} seconds')
 
-    def calc_rmsd_with_template(self, output_file):
+    def calc_rmsd_with_template(self, output_file, first=False):
         """Calculates the RMSD of each aligned PDB with the template.
         Only takes into account the selected residues and ignores any deletions.
 
@@ -371,6 +371,8 @@ class PDBdataset():
             output_file (str): Path to write to.
         """
         with torch.no_grad():
+            if self.verbosity > 0:
+                print("Saving RMSDs...")
             rotated_xyz = self.rotator.get_rotated_xyz()
             pdb_range = torch.arange(start=1, end=len(self.pdbs))
             combined_masks = self.rotator.presence_mask[0] * self.rotator.presence_mask[pdb_range]
@@ -379,11 +381,13 @@ class PDBdataset():
                 .div(combined_masks.sum(1).squeeze()).sqrt()
 
             with open(output_file, 'a', encoding='utf-8') as rmsd_file:
-                rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
+                if first:
+                    rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
                 rmsd_file.write("\n".join([
                     f"{os.path.basename(pdb)}\t{rmsds[i].item()}"
                     for i, pdb in enumerate(self.pdbs[1:])
                 ]))
+                rmsd_file.write("\n")
 
     def optimize(self):
         """Runs the optimization loop.
@@ -468,7 +472,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
         data_processor.optimize()
         data_processor.rotate_all_pool()
         if rmsd_path:
-            data_processor.calc_rmsd_with_template(rmsd_path)
+            data_processor.calc_rmsd_with_template(rmsd_path, first = i==0)
 
     if verbosity > 0:
         end_time = time.perf_counter()

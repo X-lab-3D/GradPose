@@ -10,7 +10,7 @@
 ./1A1M.pdb
 ./mhc1.zip
 ./.pylintrc
-example/aligned_PDBs/*
+examples/aligned_PDBs/*
 
 
 # Byte-compiled / optimized / DLL files

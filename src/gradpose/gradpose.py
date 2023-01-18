@@ -44,10 +44,10 @@ class Rotator():
         self.presence_mask = presence_mask
         self.nmb_samples  = self.xyz.shape[0]
         if use_numpy:
-            self.quaternions = np.random.rand(self.nmb_samples, 4) \
+            self.quaternions = np.random.rand(self.nmb_samples, 3) \
                 if quaternions is None else quaternions
         else:
-            self.quaternions = torch.rand(self.nmb_samples, 4).to(self.device) \
+            self.quaternions = torch.rand(self.nmb_samples, 3).to(self.device) \
                 if quaternions is None else quaternions.to(self.device)
         self.quaternions.requires_grad = True
 
@@ -78,23 +78,37 @@ class Rotator():
         Returns:
             torch.Tensor: Rotation matrix.
         """
-        # Normalize the q-values. The norm should equal to 1.
-        q = self._normalize(self.quaternions)
+        # # Normalize the q-values. The norm should equal to 1.
+        # q = self._normalize(self.quaternions)
+
+        q = self.quaternions
+
+        # Add fourth quaternion, always 1.
+        q = torch.concat((torch.ones(q.shape[0], 1), q), dim=1)
+
+        # Normalize
+        q = self._normalize(q)
+
+        a = q[:,0]
+        b = q[:,1]
+        c = q[:,2]
+        d = q[:,3]
+
         # init an empty matrix to fill
         if self.use_numpy:
             matrix = np.zeros((q.shape[0], 3, 3))
         else:
             matrix = torch.zeros(q.shape[0], 3, 3).to(self.device)
         # Fill the matrix
-        matrix[:,0,0] = (2 * (q[:,0]**2     + q[:,1]**2)) - 1
-        matrix[:,0,1] =  2 * (q[:,1]*q[:,2] - q[:,0]*q[:,3])
-        matrix[:,0,2] =  2 * (q[:,1]*q[:,3] + q[:,0]*q[:,2])
-        matrix[:,1,0] =  2 * (q[:,1]*q[:,2] + q[:,0]*q[:,3])
-        matrix[:,1,1] = (2 * (q[:,0]**2     + q[:,2]**2)) - 1
-        matrix[:,1,2] =  2 * (q[:,2]*q[:,3] - q[:,0]*q[:,1])
-        matrix[:,2,0] =  2 * (q[:,1]*q[:,3] - q[:,0]*q[:,2])
-        matrix[:,2,1] =  2 * (q[:,2]*q[:,3] + q[:,0]*q[:,1])
-        matrix[:,2,2] = (2 * (q[:,0]**2     + q[:,3]**2)) - 1
+        matrix[:,0,0] = a**2 + b**2 - c**2 - d**2
+        matrix[:,0,1] = 2*b*c - 2*a*d
+        matrix[:,0,2] = 2*b*d + 2*a*c
+        matrix[:,1,0] = 2*b*c + 2*a*d
+        matrix[:,1,1] = a**2 - b**2 + c**2 - d**2
+        matrix[:,1,2] = 2*c*d - 2*a*b
+        matrix[:,2,0] = 2*b*d - 2*a*c
+        matrix[:,2,1] = 2*c*d + 2*a*b
+        matrix[:,2,2] = a**2 - b**2 - c**2 + d**2
         return matrix
 
     def get_rotated_xyz(self, pdb_index=None, xyz=None, rotation_matrix=None):
@@ -147,7 +161,11 @@ class Rotator():
 
     def normalize_q(self):
         """Normalize the Rotator's quaternions."""
-        self.quaternions.data = self._normalize(self.quaternions.data)
+        q = self.quaternions.data
+        q = torch.concat((torch.ones(q.shape[0], 1), q), dim=1)
+        q = self._normalize(q)
+        self.quaternions.data = q[:,1:]
+        # self.quaternions.data = self._normalize(self.quaternions.data)
 
     # Take a gradient step
     def step(self):
@@ -397,7 +415,7 @@ class PDBdataset():
         t0 = time.perf_counter()
         label = self.rotator.xyz[0:1]
         shake_steps = max(75, -4*label.shape[1]+400)
-        finetune_steps = 25
+        finetune_steps = 250
         step = 0
         for step in trange(0, shake_steps+finetune_steps, desc="Aligning backbones",
                 disable=self.verbosity != 1):

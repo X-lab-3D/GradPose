@@ -20,6 +20,8 @@ Install GradPose using Python's package installer pip:
 pip install gradpose
 ```
 
+## PDB requirements
+GradPose is a structural superimposition tool. It does **not** perform any structure alignment. PDBs used with GradPose **must** have matching residue numbering. In this way, missing residues can be detected and are ignored when aligning and calculating RMSDs.
 
 ## Usage
 

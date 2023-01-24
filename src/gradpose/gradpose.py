@@ -15,9 +15,7 @@ import torch.nn.functional as F
 from tqdm import tqdm, trange
 from gradpose import util
 
-# TODO: Consistent bar lengths (bar_format=)
 # TODO: Argument to overwrite original files
-# TODO: Check all of the docstrings, some arguments are be different!
 
 class Rotator():
     """The Rotation module with all learnable parameters.
@@ -310,7 +308,6 @@ class PDBdataset():
             pdb_index (int): The index of the PDB to be rotated.
             rotation_matrix (torch.Tensor): The rotation matrix to use for the rotator.
         """
-        # TODO: Update docstring
         with torch.no_grad():
             pdb_file = self.pdbs[pdb_index]
             xyz = torch.Tensor(self._extract_pdb_atoms(pdb_file)).reshape(1, -1, 3)
@@ -370,6 +367,8 @@ class PDBdataset():
 
         Args:
             output_file (str): Path to write to.
+            first (bool): Whether this is the first batch and write the template to the file.
+                Defaults to False.
         """
         with torch.no_grad():
             if self.verbosity > 0:

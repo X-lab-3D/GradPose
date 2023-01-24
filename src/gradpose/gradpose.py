@@ -167,7 +167,8 @@ class PDBdataset():
     """
     def __init__(self, pdbs, template_pdb, residues, chain,
             cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
-        """_summary_
+        """Set up the PDB dataset object and load in the PDB files' CA atoms.
+        Also determines which chain and residues to use in case they are not provided.
 
         Args:
             pdbs (str): Folder where the PDB files are located.

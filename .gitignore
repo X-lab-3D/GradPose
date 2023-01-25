@@ -12,6 +12,7 @@
 ./.pylintrc
 ./htmlcov/*
 examples/aligned_PDBs/*
+.coverage
 
 
 # Byte-compiled / optimized / DLL files

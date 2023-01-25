@@ -6,6 +6,7 @@ import warnings
 import glob
 import time
 import os
+import sys
 import math
 from itertools import repeat
 import numpy as np
@@ -481,7 +482,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
 
 def main():
     """Runs the PDB superposition using command line arguments."""
-    arguments = util.parse_args()
+    arguments = util.parse_args(sys.argv[1:])
 
     pdbs_list = []
     if arguments.subfolders:

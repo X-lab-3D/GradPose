@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 import torch.multiprocessing as mp
 import torch.cuda
 
-def parse_args():
+def parse_args(arguments):
     """Parses and processes the command line arguments.
 
     Returns:
@@ -134,7 +134,7 @@ def parse_args():
     )
 
     # Parse the arguments
-    parsed_args = arg_parser.parse_args()
+    parsed_args = arg_parser.parse_args(arguments)
 
     # Print help if no arguments are used
     if len(sys.argv) < 2:

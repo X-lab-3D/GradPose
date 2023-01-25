@@ -10,6 +10,8 @@
 ./1A1M.pdb
 ./mhc1.zip
 ./.pylintrc
+./htmlcov/*
+examples/aligned_PDBs/*
 
 
 # Byte-compiled / optimized / DLL files

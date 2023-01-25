@@ -6,6 +6,7 @@ import warnings
 import glob
 import time
 import os
+import sys
 import math
 from itertools import repeat
 import numpy as np
@@ -15,9 +16,7 @@ import torch.nn.functional as F
 from tqdm import tqdm, trange
 from gradpose import util
 
-# TODO: Consistent bar lengths (bar_format=)
 # TODO: Argument to overwrite original files
-# TODO: Check all of the docstrings, some arguments are be different!
 
 class Rotator():
     """The Rotation module with all learnable parameters.
@@ -167,7 +166,8 @@ class PDBdataset():
     """
     def __init__(self, pdbs, template_pdb, residues, chain,
             cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
-        """_summary_
+        """Set up the PDB dataset object and load in the PDB files' CA atoms.
+        Also determines which chain and residues to use in case they are not provided.
 
         Args:
             pdbs (str): Folder where the PDB files are located.
@@ -309,7 +309,6 @@ class PDBdataset():
             pdb_index (int): The index of the PDB to be rotated.
             rotation_matrix (torch.Tensor): The rotation matrix to use for the rotator.
         """
-        # TODO: Update docstring
         with torch.no_grad():
             pdb_file = self.pdbs[pdb_index]
             xyz = torch.Tensor(self._extract_pdb_atoms(pdb_file)).reshape(1, -1, 3)
@@ -363,14 +362,18 @@ class PDBdataset():
         if self.verbosity > 1:
             print(f'Rotating and saving data took: {time.perf_counter() - t0:.2f} seconds')
 
-    def calc_rmsd_with_template(self, output_file):
+    def calc_rmsd_with_template(self, output_file, first=False):
         """Calculates the RMSD of each aligned PDB with the template.
         Only takes into account the selected residues and ignores any deletions.
 
         Args:
             output_file (str): Path to write to.
+            first (bool): Whether this is the first batch and write the template to the file.
+                Defaults to False.
         """
         with torch.no_grad():
+            if self.verbosity > 0:
+                print("Saving RMSDs...")
             rotated_xyz = self.rotator.get_rotated_xyz()
             pdb_range = torch.arange(start=1, end=len(self.pdbs))
             combined_masks = self.rotator.presence_mask[0] * self.rotator.presence_mask[pdb_range]
@@ -379,11 +382,13 @@ class PDBdataset():
                 .div(combined_masks.sum(1).squeeze()).sqrt()
 
             with open(output_file, 'a', encoding='utf-8') as rmsd_file:
-                rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
+                if first:
+                    rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
                 rmsd_file.write("\n".join([
                     f"{os.path.basename(pdb)}\t{rmsds[i].item()}"
                     for i, pdb in enumerate(self.pdbs[1:])
                 ]))
+                rmsd_file.write("\n")
 
     def optimize(self):
         """Runs the optimization loop.
@@ -447,6 +452,9 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
     else:
         device = torch.device("cpu")
 
+    if rmsd_path and os.path.exists(rmsd_path):
+        os.remove(rmsd_path)
+
     num_batches = math.ceil(len(pdbs_list)/batch_size)
     for i in range(num_batches):
         batch_start = i * batch_size
@@ -465,7 +473,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
         data_processor.optimize()
         data_processor.rotate_all_pool()
         if rmsd_path:
-            data_processor.calc_rmsd_with_template(rmsd_path)
+            data_processor.calc_rmsd_with_template(rmsd_path, first = i==0)
 
     if verbosity > 0:
         end_time = time.perf_counter()
@@ -474,7 +482,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
 
 def main():
     """Runs the PDB superposition using command line arguments."""
-    arguments = util.parse_args()
+    arguments = util.parse_args(sys.argv[1:])
 
     pdbs_list = []
     if arguments.subfolders:

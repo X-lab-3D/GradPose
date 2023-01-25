@@ -20,11 +20,13 @@ Install GradPose using Python's package installer pip:
 pip install gradpose
 ```
 
+## PDB requirements
+GradPose is a structural superimposition tool. It does **not** perform any structure alignment. PDBs used with GradPose **must** have matching residue numbering. In this way, missing residues can be detected and are ignored when aligning and calculating RMSDs.
 
 ## Usage
 
 ```sh
-gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-g] [-b BATCH_SIZE] [--silent] [--verbose] [--rmsd]
+gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-b BATCH_SIZE] [--gpu] [--rmsd] [--silent] [--verbose]
 ```
 Help and defaults for each argument can be viewed by executing GradPose with the help argument: ``gradpose -h``.
 Alternatively, you can examine the example usages listed below.
@@ -50,7 +52,6 @@ Using another folder name, or overwriting the current folder without creating a 
 gradpose -i example_folder -o example_output_folder
 ```
 Note: To overwrite the current files, provide the same input and output folder.
-
 
 ### Template
 If the PDBs in folder 'example_folder' need to be aligned to a specific template, use the ``-t`` argument:

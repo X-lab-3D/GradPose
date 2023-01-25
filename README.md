@@ -109,5 +109,5 @@ Alternatively, more verbose console output may be enabled with ``--verbose``.
 gradpose -i example_folder --verbose
 ```
 
-##Badges
+## Badges
 [![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/GradPose/badge.svg?branch=main)](https://coveralls.io/github/X-lab-3D/GradPose?branch=main)

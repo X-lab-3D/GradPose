@@ -1,8 +1,7 @@
 # GradPose
 [![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/GradPose/badge.svg?branch=main)](https://coveralls.io/github/X-lab-3D/GradPose?branch=main)
-
+![Build](https://github.com/DeepRank/deeprank/workflows/Build/badge.svg)
 [![PyPI](https://img.shields.io/pypi/v/gradpose)](https://pypi.org/project/gradpose/)
-
 
 
 Welcome to the GitHub repository for the GradPose tool.

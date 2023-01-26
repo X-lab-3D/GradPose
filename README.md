@@ -1,5 +1,5 @@
 # GradPose
-
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/GradPose/badge.svg?branch=main)](https://coveralls.io/github/X-lab-3D/GradPose?branch=main)
 Welcome to the GitHub repository for the GradPose tool.
 
 GradPose is a novel structural superimposition command-line tool and Python package for PDB files. GradPose uses gradient descent to incrementally approach the optimal rotation matrices (via quaternions) for alignment.  It is memory efficient and enables for the quick alignment of thousands to millions of protein structures to a template structure while also providing exact control over which chain and specific residues to align. The tool is designed to overcome the limitations of classical superimposition algorithms, which are not equipped to handle the large number of PDB files produced by researchers today. Our method scales linearly with the number of residues and can also use batch matrix operations effectively even when there are amino-acid insertions or deletions. This makes it more efficient than traditional methods, which tend to scale exponentially with the number of residues and process the pbds individually. Furthermore, if a GPU is available, it can use CUDA acceleration.
@@ -108,6 +108,3 @@ Alternatively, more verbose console output may be enabled with ``--verbose``.
 ```sh
 gradpose -i example_folder --verbose
 ```
-
-## Badges
-[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/GradPose/badge.svg?branch=main)](https://coveralls.io/github/X-lab-3D/GradPose?branch=main)

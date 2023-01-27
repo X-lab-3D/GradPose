@@ -189,8 +189,8 @@ def parse_args(arguments):
             if parsed_args.verbosity > 1:
                 print("Selected residues:")
                 print(parsed_args.residues)
-            if len(parsed_args.residues) < 3:
-                raise Exception("Please specify at least 3 residues for alignment.")
+            if len(parsed_args.residues) < 5:
+                raise Exception("Please specify at least 5 residues for alignment.")
         except TypeError as exc:
             raise TypeError("Could not parse a residue (range) as integers.") from exc
 

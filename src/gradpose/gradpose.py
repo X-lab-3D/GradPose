@@ -22,7 +22,7 @@ class Rotator():
     """The Rotation module with all learnable parameters.
     """
     def __init__(self, xyz, presence_mask, center=None, quaternions=None,
-        device='cpu', use_numpy=False):
+        device='cpu'):
         """Initializes the Rotator object.
 
         Args:
@@ -32,9 +32,9 @@ class Rotator():
                 Shape=(No. of PDBs, 3) Defaults to None.
             quaternions (torch.Tensor, optional): Alternative quaternions to set for each PDB.
             device (str, optional): The device tensors will be stored on. Defaults to 'cpu'.
-            use_numpy (bool, optional): Whether to use numpy instead of pytorch. Defaults to False.
         """
 
+        self.use_numpy = False
         self.device = device
         # Rotation is always over the center of the pdb structures
         self.center = self.get_center(xyz, presence_mask) \
@@ -42,12 +42,8 @@ class Rotator():
         self.xyz = xyz - self.center
         self.presence_mask = presence_mask
         self.nmb_samples  = self.xyz.shape[0]
-        if use_numpy:
-            self.quaternions = np.random.rand(self.nmb_samples, 4) \
-                if quaternions is None else quaternions
-        else:
-            self.quaternions = torch.rand(self.nmb_samples, 4).to(self.device) \
-                if quaternions is None else quaternions.to(self.device)
+        self.quaternions = torch.rand(self.nmb_samples, 4).to(self.device) \
+            if quaternions is None else quaternions.to(self.device)
         self.quaternions.requires_grad = True
 
         # Normalize the scale of the proteins
@@ -56,7 +52,6 @@ class Rotator():
         self.learning_rate = 100
 
         self.optimizer = torch.optim.SGD([self.quaternions], lr=self.learning_rate)
-        self.use_numpy = use_numpy
 
 
     def get_center(self, xyz, presence_mask):
@@ -332,7 +327,7 @@ class PDBdataset():
                     out_file.write(''.join(pdb))
 
 
-    def _rotate_single_pdb_pool(self, variables):
+    def _rotate_single_pdb_multiprocessing(self, variables):
         """Intermediate function that unpacks the single tuple variable from imap
         as arguments to the true rotate function.
 
@@ -341,7 +336,7 @@ class PDBdataset():
         """
         self._rotate_single_pdb(*variables)
 
-    def rotate_all_pool(self):
+    def rotate_all_with_multiprocessing(self):
         """Pool the rotating of PDBs."""
         with torch.no_grad():
             t0 = time.perf_counter()
@@ -352,7 +347,7 @@ class PDBdataset():
 
             with mp.Pool(self.cores) as pool:
                 list(tqdm(pool.imap(
-                                self._rotate_single_pdb_pool,
+                                self._rotate_single_pdb_multiprocessing,
                                 zip(range(1, len(self.pdbs)), repeat(rotation_matrix)),
                                 chunksize=max(2, round(len(self.pdbs) / (self.cores * 16)))
                                     ),
@@ -471,7 +466,7 @@ def superpose(pdbs_list, template, output=None, residues=None, chain=None, cores
             verbosity
         )
         data_processor.optimize()
-        data_processor.rotate_all_pool()
+        data_processor.rotate_all_with_multiprocessing()
         if rmsd_path:
             data_processor.calc_rmsd_with_template(rmsd_path, first = i==0)
 

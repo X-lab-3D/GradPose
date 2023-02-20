@@ -13,7 +13,11 @@ import torch
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 from tqdm import tqdm, trange
-from gradpose import util
+#from gradpose import util
+import util
+from PDBdataset import *
+from Rotator import *
+
 
 # TODO: Consistent bar lengths (bar_format=)
 # TODO: Argument to overwrite original files

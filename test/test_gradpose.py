@@ -9,6 +9,9 @@ from gradpose import util
 DOCKING_PATH = "./test/data/docking"
 DOCKING_MODELS = glob.glob(os.path.join(DOCKING_PATH, "*.pdb"))
 
+HOMOLOG_PATH = "./test/data/homologs"
+HOMOLOG_MODELS = glob.glob(os.path.join(HOMOLOG_PATH, "*.pdb"))
+
 TEST_ENV = os.environ.copy()
 
 class TestGradPose(unittest.TestCase):
@@ -37,8 +40,45 @@ class TestGradPose(unittest.TestCase):
         # Confirm that aligning worked.
         for rmsd in rmsds:
             self.assertTrue(rmsd < 1e-5)
+    
+    
+    def assert_homolog(self, tmp_path, rmsd_path):
+        """Generic check if superimposing of homolog models succeeded.
+        Because the receptor chain is identical in all PDBs,
 
+        Args:
+            tmp_path (str): Path to folder with aligned PBDs.
+            rmsd_path (str): Path to what should be the RMSD file.
+        """
+        # Ensure we have the right amount of output pdbs.
+        self.assertTrue(len(HOMOLOG_MODELS) == len(glob.glob(os.path.join(tmp_path, "*.pdb"))))
 
+        # Confirm an rmsd file was made.
+        self.assertTrue(os.path.exists(rmsd_path))
+
+        # Confirm that all RMSDs are there.
+        with open(rmsd_path, "r", encoding='utf-8') as rmsd_file:
+            rmsds = rmsd_file.read()
+        rmsds = [float(rmsd.split("\t")[1]) for rmsd in rmsds.split("\n")[1:] if rmsd]
+        self.assertTrue(len(rmsds) == len(HOMOLOG_MODELS))
+
+        # Confirm that aligning worked.
+        for rmsd in rmsds:
+            self.assertTrue(rmsd < 1)
+    
+    
+    def test_homolog_package(self):
+        """Test GradPose on homolog models through the Python package.
+        """
+        with tempfile.TemporaryDirectory() as tmp_path:
+
+            rmsd_path = os.path.join(tmp_path, "rmsd.tsv")
+            gradpose.superpose(HOMOLOG_MODELS, HOMOLOG_MODELS[0], tmp_path, rmsd_path=rmsd_path)
+
+            # Confirm that superposition worked.
+            self.assert_homolog(tmp_path, rmsd_path)
+
+            
     def test_docking_package(self):
         """Test GradPose on docking models through the Python package.
         """

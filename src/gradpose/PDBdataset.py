@@ -228,7 +228,7 @@ class PDBdataset():
         with torch.no_grad():
             if self.verbosity > 0:
                 print("Saving RMSDs...")
-            rotated_xyz = self.rotator.get_rotated_xyz()
+            rotated_xyz = self.rotator.get_rotated_xyz() * self.rotator.scale_factor
             pdb_range = torch.arange(start=1, end=len(self.pdbs))
             combined_masks = self.rotator.presence_mask[0] * self.rotator.presence_mask[pdb_range]
             rmsds = ((rotated_xyz[0] - rotated_xyz[pdb_range]) * combined_masks)\

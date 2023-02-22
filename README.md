@@ -5,7 +5,7 @@
 
 Welcome to the GitHub repository for the GradPose tool.
 
-GradPose is a novel structural superimposition command-line tool and Python package for PDB files. GradPose uses gradient descent to incrementally approach the optimal rotation matrices (via quaternions) for alignment.  It is memory efficient and enables for the quick alignment of thousands to millions of protein structures to a template structure while also providing exact control over which chain and specific residues to align. The tool is designed to overcome the limitations of classical superimposition algorithms, which are not equipped to handle the large number of PDB files produced by researchers today. Our method scales linearly with the number of residues and can also use batch matrix operations effectively even when there are amino-acid insertions or deletions. This makes it more efficient than traditional methods, which tend to scale exponentially with the number of residues and process the pbds individually. Furthermore, if a GPU is available, it can use CUDA acceleration.
+GradPose is a novel structural superimposition command-line tool and Python package for PDB files. GradPose uses gradient descent to incrementally approach the optimal rotation matrices (via quaternions) for alignment.  It is memory efficient and enables for the quick alignment of thousands to millions of protein structures to a reference structure while also providing exact control over which chain and specific residues to align. The tool is designed to overcome the limitations of classical superimposition algorithms, which are not equipped to handle the large number of PDB files produced by researchers today. Our method scales linearly with the number of residues and can also use batch matrix operations effectively even when there are amino-acid insertions or deletions. This makes it more efficient than traditional methods, which tend to scale exponentially with the number of residues and process the pbds individually. Furthermore, if a GPU is available, it can use CUDA acceleration.
 
 This repository contains the source code and documentation for the GradPose tool. Please refer to the documentation for instructions on how to use the tool and for more information about its features and capabilities.
 
@@ -29,7 +29,7 @@ GradPose is a structural superimposition tool. It does **not** perform any struc
 ## Usage
 
 ```sh
-gradpose [-h] [-i INPUT] [-s] [-t TEMPLATE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-b BATCH_SIZE] [--gpu] [--rmsd] [--silent] [--verbose]
+gradpose [-h] [-i INPUT] [-s] [-t REFERENCE] [-o OUTPUT] [-c CHAIN] [-r RESIDUES [RESIDUES ...]] [-n N_CORES] [-b BATCH_SIZE] [--gpu] [--rmsd] [--silent] [--verbose]
 ```
 Help and defaults for each argument can be viewed by executing GradPose with the help argument: ``gradpose -h``.
 Alternatively, you can examine the example usages listed below.

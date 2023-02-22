@@ -1,22 +1,28 @@
-import torch
-from itertools import repeat
-import os
-import time
 import torch.multiprocessing as mp
-import numpy as np
 from tqdm import tqdm, trange
-from Rotator import *
+from itertools import repeat
+from .Rotator import Rotator
+import numpy as np
+import torch
+import time
+import os
+
+"""
+GradPose: PDB Superimposition using Gradient Descent
+Authors: Daniel Rademaker, Kevin van Geemen
+"""
+
 class PDBdataset():
     """Class that processes PDBs.
     """
-    def __init__(self, pdbs, template_pdb, residues, chain,
+    def __init__(self, pdbs, reference_pdb, residues, chain,
             cores=mp.cpu_count(), output='result', device='cpu', verbosity=1):
         """Set up the PDB dataset object and load in the PDB files' CA atoms.
         Also determines which chain and residues to use in case they are not provided.
 
         Args:
             pdbs (str): Folder where the PDB files are located.
-            template_pdb (str): Path to the template PDB.
+            reference_pdb (str): Path to the reference PDB.
             residues (list[int]): List of residue IDs to be used for alignment.
             chain (str): Chain ID to be used for alignment.
             cores (int, optional): Amount of CPU cores to use for multiprocessing.
@@ -27,48 +33,16 @@ class PDBdataset():
         """
         self.device = device
         self.verbosity = verbosity
-        self.chain = chain
 
-        if not residues or not chain:
-            with open(template_pdb, 'r', encoding='utf-8') as template_file:
-                template_file_data = template_file.read().split('\n')
+        if not chain:
+            self.chain = self._determine_longest_chain(reference_pdb)
+        else:
+            self.chain = chain
 
-                if not chain:
-                    if self.verbosity > 0:
-                        print("No chain selected, using longest chain: ", end='')
+        self.residues = self._determine_residues(reference_pdb, residues)
 
-                    chain_dict = {}
-                    for line in template_file_data:
-                        if not line.startswith('ATOM  '):
-                            continue
-                        chain_id = line[21]
-                        if not chain_id in chain_dict:
-                            chain_dict[chain_id] = 0
-                        chain_dict[chain_id] += 1
-                    self.chain = sorted([
-                        (count, chain_id)
-                        for chain_id, count in chain_dict.items()
-                    ], reverse=True)[0][1]
-
-                    if self.verbosity > 0:
-                        print(f"{self.chain}")
-
-                if not residues:
-                    if self.verbosity > 0:
-                        print("No residues selected, determining from template chain: ", end='')
-                    residues = list(set([
-                        int(line[22:26])
-                        for line in template_file_data
-                        if line.startswith('ATOM ') and line[21] == self.chain
-                    ]))
-
-                    if self.verbosity > 0:
-                        print(f"{residues[0]}:{residues[-1]}")
-
-
-        self.residues = [int(i) for i in residues]
         self.residues_dict = {i:self.residues.index(i) for i in self.residues}
-        self.pdbs = [template_pdb] + pdbs
+        self.pdbs = [reference_pdb] + pdbs
         self.cores = cores
         self.output = output
 
@@ -84,6 +58,41 @@ class PDBdataset():
         # Instantiate a Rotator
         self.rotator = Rotator(xyz, presence_mask, device=self.device)
 
+    def _determine_longest_chain(self, reference_pdb):
+        with open(reference_pdb, 'r', encoding='utf-8') as reference_file:
+            reference_file_data = reference_file.read().split('\n')
+
+            chain_dict = {}
+            for line in reference_file_data:
+                if not line.startswith('ATOM'):
+                    continue
+                chain_id = line[21]
+                if not chain_id in chain_dict:
+                    chain_dict[chain_id] = 0
+                chain_dict[chain_id] += 1
+            longest_chain = sorted([(count, chain_id) for chain_id, count in chain_dict.items()], reverse=True)[0][1]
+
+            if self.verbosity > 0:
+                print(f"No chain selected, using longest chain: {longest_chain}")
+
+            return longest_chain
+
+    def _determine_residues(self, reference_pdb, residues):
+        
+        with open(reference_pdb, 'r', encoding='utf-8') as reference_file:
+            reference_file_data = reference_file.read().split('\n')
+
+            residues_extracted = list(set([int(line[22:26]) for line in reference_file_data if line.startswith('ATOM ') and line[21] == self.chain]))
+            residues_extracted.sort()
+        if residues != None:
+            residues_conv = [int(i) for i in residues if residues]
+            residues_extracted = [residue for residue in residues_extracted if residue in residues_conv]
+            if self.verbosity > 0:
+                print(f"No residues selected, determining from reference chain: {residues_extracted[0]}:{residues_extracted[-1]}")
+
+        return residues_extracted
+    
+    
     def _extract_pdb_atoms(self, file_name):
         """Extract all atom xyz coordinates
 
@@ -207,13 +216,13 @@ class PDBdataset():
         if self.verbosity > 1:
             print(f'Rotating and saving data took: {time.perf_counter() - t0:.2f} seconds')
 
-    def calc_rmsd_with_template(self, output_file, first=False):
-        """Calculates the RMSD of each aligned PDB with the template.
+    def calc_rmsd_with_reference(self, output_file, first=False):
+        """Calculates the RMSD of each aligned PDB with the reference.
         Only takes into account the selected residues and ignores any deletions.
 
         Args:
             output_file (str): Path to write to.
-            first (bool): Whether this is the first batch and write the template to the file.
+            first (bool): Whether this is the first batch and write the reference to the file.
                 Defaults to False.
         """
         with torch.no_grad():
@@ -228,7 +237,7 @@ class PDBdataset():
 
             with open(output_file, 'a', encoding='utf-8') as rmsd_file:
                 if first:
-                    rmsd_file.write(f"Template\t{self.pdbs[0]}\n")
+                    rmsd_file.write(f"reference\t{self.pdbs[0]}\n")
                 rmsd_file.write("\n".join([
                     f"{os.path.basename(pdb)}\t{rmsds[i].item()}"
                     for i, pdb in enumerate(self.pdbs[1:])
@@ -237,7 +246,7 @@ class PDBdataset():
 
     def optimize(self):
         """Runs the optimization loop.
-        Attempts to find the optimal rotation to superpose all PDBs to the template."""
+        Attempts to find the optimal rotation to superpose all PDBs to the reference."""
         if self.verbosity > 1:
             print("Aligning backbones")
         t0 = time.perf_counter()
@@ -258,4 +267,3 @@ class PDBdataset():
                 print(f'Step: {step+1} \t Loss: {loss}')
         if self.verbosity > 1:
             print(f'Steps: {step+1}, alignment-time: {time.perf_counter()-t0:.2f}')
-

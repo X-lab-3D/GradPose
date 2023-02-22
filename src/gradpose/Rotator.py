@@ -1,7 +1,12 @@
-import torch
-import numpy as np
-from tqdm import tqdm, trange
 import torch.nn.functional as F
+import numpy as np
+import torch
+
+"""
+GradPose: PDB Superimposition using Gradient Descent
+Authors: Daniel Rademaker, Kevin van Geemen
+"""
+
 class Rotator():
     """The Rotation module with all learnable parameters.
     """
@@ -115,9 +120,9 @@ class Rotator():
         return quaternions
 
     def _loss(self):
-        """Calculate the loss by comparing the rotated coordinates with the template's."""
+        """Calculate the loss by comparing the rotated coordinates with the reference's."""
         new_xyz = self.get_rotated_xyz()
-        loss =  F.mse_loss(new_xyz, self.xyz[0], reduction='none') * self.presence_mask
+        loss = F.mse_loss(new_xyz, self.xyz[0], reduction='none') * self.presence_mask
         loss = loss.mean(2)
         loss = loss.mean(1)
         # self.history += [[i.item() for i in loss]]
@@ -139,4 +144,3 @@ class Rotator():
         self.optimizer.step()
         self.optimizer.zero_grad()
         return loss.item()
-

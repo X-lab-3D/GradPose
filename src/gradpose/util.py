@@ -1,12 +1,19 @@
 """
 Utility function(s) moved here to declutter the main file.
 """
-import sys
-import os
-import warnings
+
 from argparse import ArgumentParser
 import torch.multiprocessing as mp
 import torch.cuda
+import warnings
+import sys
+import os
+
+
+"""
+GradPose: PDB Superimposition using Gradient Descent
+Authors: Daniel Rademaker, Kevin van Geemen
+"""
 
 def parse_args(arguments):
     """Parses and processes the command line arguments.
@@ -19,7 +26,7 @@ def parse_args(arguments):
         and Python package for PDB files. GradPose uses gradient descent to incrementally
         approach the optimal rotation matrices (via quaternions) for alignment. It is
         memory efficient and enables for the quick alignment of thousands to millions of
-        protein structures to a template structure while also providing exact control over
+        protein structures to a reference structure while also providing exact control over
         which chain and specific residues to align. The tool is designed to overcome the
         limitations of classical superimposition algorithms, which are not equipped to handle
         the large number of PDB files produced by researchers today. Our method scales
@@ -47,11 +54,11 @@ def parse_args(arguments):
         """,
         action='store_true'
     )
-    arg_parser.add_argument("-t", "--template",
+    arg_parser.add_argument("-t", "--reference",
         help="""
-        (Optional) Path to a PDB file to use as template for alignment.
+        (Optional) Path to a PDB file to use as reference for alignment.
         It does not have to be part of the input files.
-        The template will not be written to the output folder unless it is also an input file.
+        The reference will not be written to the output folder unless it is also an input file.
         Defaults to the first input file alphabetically.
         """,
         type=str,
@@ -68,7 +75,7 @@ def parse_args(arguments):
     arg_parser.add_argument("-c", "--chain",
         help="""
         (Optional) The chain ID to use for alignment.
-        Defaults to the longest chain of the template.
+        Defaults to the longest chain of the reference.
         """,
         type=str,
         default=None
@@ -77,7 +84,7 @@ def parse_args(arguments):
         help="""
         (Optional) List of residue numbers to use for alignment. Separated by spaces.
         Indicate ranges as: start:stop (Including start and stop.)
-        Defaults to all residues in the selected chain of the template.
+        Defaults to all residues in the selected chain of the reference.
         """,
         nargs='+',
         type=str,
@@ -115,7 +122,7 @@ def parse_args(arguments):
     )
     arg_parser.add_argument("--rmsd",
         help="""
-        (Optional) Calculate RMSD between template and models (only at selected residues)
+        (Optional) Calculate RMSD between reference and models (only at selected residues)
         and save the results as rmsd.tsv in the output folder.
         """,
         action="store_true"

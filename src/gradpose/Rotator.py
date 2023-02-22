@@ -37,8 +37,8 @@ class Rotator():
         self.quaternions.requires_grad = True
 
         # Normalize the scale of the proteins
-        scale_factor = self.xyz[0].norm(dim=1).std()/100
-        self.xyz = self.xyz.div(scale_factor)
+        self.scale_factor = self.xyz[0].norm(dim=1).std()/100
+        self.xyz = self.xyz.div(self.scale_factor)
         self.learning_rate = 100
 
         self.optimizer = torch.optim.SGD([self.quaternions], lr=self.learning_rate)

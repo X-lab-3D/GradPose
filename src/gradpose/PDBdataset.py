@@ -51,7 +51,7 @@ class PDBdataset():
             print(f"Number of 3D Models: {len(self.pdbs)}")
             print('Start loading data')
         t0 = time.perf_counter()
-        xyz, presence_mask = self.load_ca_atom_positions()
+        xyz, presence_mask = self.load_atom_positions()
         if self.verbosity > 1:
             print(f'Retrieved data, time: {time.perf_counter()-t0:.2f} seconds')
 
@@ -135,7 +135,35 @@ class PDBdataset():
         xyz[0][pxyz[:, 0].astype(int)] = pxyz[:, 1:]
         return xyz
 
-    def load_ca_atom_positions(self):
+    def _extract_pdb_backbone(self, file_name):
+        """Extract coordianates of all CA in specified chains and residues.
+
+        Args:
+            file_name (str): Path to PDB file.
+
+        Returns:
+            numpy.ndarray: Array that contains the XYZ coordinates of the CA atom per residue.
+        """
+        with open(file_name, encoding='utf-8') as pdb_file:
+            pxyz = np.array(
+                [
+                    [
+                        self.residues_dict[int(line[22:26])],
+                        float(line[30:38]),
+                        float(line[38:46]),
+                        float(line[46:54])
+                    ]
+                    for line in pdb_file.read().split('\n') \
+                    if line.startswith('ATOM ') and line[13:15].strip() in ['CA', 'N', 'O', 'C'] \
+                        and line[21] == self.chain \
+                        and int(line[22:26]) in self.residues
+                ]
+            )
+        xyz = np.zeros((1, len(self.residues), 3))
+        xyz[0][pxyz[:, 0].astype(int)] = pxyz[:, 1:]
+        return xyz
+
+    def load_atom_positions(self):
         """Parse the PDBs to obtain the data needed for calculating the rotation matrices.
 
         Returns:
@@ -146,7 +174,7 @@ class PDBdataset():
             ca_xyz = torch.tensor(
                 np.concatenate(list(tqdm(
                     pool.imap(
-                        self._extract_pdb_ca,
+                        self._extract_pdb_backbone,
                         self.pdbs,
                         max(2, round(len(self.pdbs) / (self.cores * 16)))
                     ),
